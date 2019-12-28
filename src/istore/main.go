@@ -8,8 +8,8 @@ import (
 
 	//"github.com/gin-gonic/contrib/static"
 
-	"bitbucket.org/vadimtitov/config"
-	"bitbucket.org/vadimtitov/controllers"
+	"bitbucket.org/vadimtitov/istorage/config"
+	"bitbucket.org/vadimtitov/istorage/controllers"
 )
 
 func main() {

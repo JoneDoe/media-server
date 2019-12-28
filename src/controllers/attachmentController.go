@@ -11,8 +11,8 @@ import (
 
 	"bitbucket.org/vadimtitov/istorage/attachment"
 	"bitbucket.org/vadimtitov/istorage/config"
-	"upload"
-	"utils"
+	"bitbucket.org/vadimtitov/istorage/upload"
+	"bitbucket.org/vadimtitov/istorage/utils"
 )
 
 func StoreAttachment(c *gin.Context) {

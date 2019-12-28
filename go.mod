@@ -8,3 +8,13 @@ require (
 	github.com/go-yaml/yaml v2.1.0+incompatible
 	github.com/google/uuid v1.1.1
 )
+
+replace bitbucket.org/vadimtitov/istorage/attachment => ./attachment
+
+replace bitbucket.org/vadimtitov/istorage/config => ./config
+
+replace bitbucket.org/vadimtitov/istorage/controllers => ./controllers
+
+replace bitbucket.org/vadimtitov/istorage/upload => ./upload
+
+replace bitbucket.org/vadimtitov/istorage/utils => ./utils
