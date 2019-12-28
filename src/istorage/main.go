@@ -8,8 +8,8 @@ import (
 
 	//"github.com/gin-gonic/contrib/static"
 
-	"bitbucket.org/vadimtitov/istorage/config"
-	"bitbucket.org/vadimtitov/istorage/controllers"
+	"github.com/JoneDoe/istorage/config"
+	"github.com/JoneDoe/istorage/controllers"
 )
 
 func main() {

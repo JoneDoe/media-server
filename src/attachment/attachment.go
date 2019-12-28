@@ -1,6 +1,6 @@
 package attachment
 
-import "bitbucket.org/vadimtitov/istorage/upload"
+import "github.com/JoneDoe/istorage/upload"
 
 // Attachment contain info about directory, base mime type and all files saved.
 type Attachment struct {

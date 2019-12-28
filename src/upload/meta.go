@@ -38,7 +38,7 @@ func ParseMeta(req *http.Request) (*Meta, error) {
 		return nil, err
 	}
 
-	cookie_pavo, err := req.Cookie("istore")
+	cookie_pavo, err := req.Cookie("istorage")
 	if err != nil {
 		return nil, err
 	}

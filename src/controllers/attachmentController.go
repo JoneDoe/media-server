@@ -9,10 +9,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"bitbucket.org/vadimtitov/istorage/attachment"
-	"bitbucket.org/vadimtitov/istorage/config"
-	"bitbucket.org/vadimtitov/istorage/upload"
-	"bitbucket.org/vadimtitov/istorage/utils"
+	"github.com/JoneDoe/istorage/attachment"
+	"github.com/JoneDoe/istorage/config"
+	"github.com/JoneDoe/istorage/upload"
+	"github.com/JoneDoe/istorage/utils"
 )
 
 func StoreAttachment(c *gin.Context) {
@@ -24,10 +24,10 @@ func StoreAttachment(c *gin.Context) {
 
 	converts["original"] = ""
 
-	pavo, _ := c.Request.Cookie("istore")
+	pavo, _ := c.Request.Cookie("istorage")
 	if pavo == nil {
 		pavo = &http.Cookie{
-			Name:    "istore",
+			Name:    "istorage",
 			Value:   uuid.New().String(),
 			Expires: time.Now().Add(10 * 356 * 24 * time.Hour),
 			Path:    "/",

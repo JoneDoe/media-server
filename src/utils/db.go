@@ -7,7 +7,7 @@ import (
 
 	"github.com/boltdb/bolt"
 
-	a "bitbucket.org/vadimtitov/istorage/attachment"
+	a "github.com/JoneDoe/istorage/attachment"
 )
 
 const dbFile = "iStorage.db"
