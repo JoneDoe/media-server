@@ -3,12 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/JoneDoe/istorage/config"
 	"github.com/gin-gonic/gin"
 	"log"
 
 	//"github.com/gin-gonic/contrib/static"
 
-	"github.com/JoneDoe/istorage/config"
 	"github.com/JoneDoe/istorage/controllers"
 )
 
