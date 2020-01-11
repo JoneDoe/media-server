@@ -58,11 +58,7 @@ func (dm *DirManager) Create() error {
 // Generate path given mime and date.
 func (dm *DirManager) CalcPath(mime string) {
 	date := time.Now()
-	dm.Path = fmt.Sprintf("/%s/%d/%s/%s", mime, date.Year(), yearDay(date), containerName(date))
-}
-
-func yearDay(t time.Time) string {
-	return strconv.FormatInt(int64(t.YearDay()), 36)
+	dm.Path = fmt.Sprintf("/%s/%d/%s", mime, date.Year(), containerName(date))
 }
 
 func containerName(t time.Time) string {

@@ -4,69 +4,53 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 
-	"github.com/JoneDoe/istorage/attachment"
-	"github.com/JoneDoe/istorage/config"
-	"github.com/JoneDoe/istorage/upload"
-	"github.com/JoneDoe/istorage/utils"
+	"istorage/attachment"
+	"istorage/config"
+	"istorage/models"
+	"istorage/services"
+	"istorage/utils"
 )
 
 func StoreAttachment(c *gin.Context) {
-	converts, err := GetConvertParams(c.Request)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.OnError(fmt.Sprintf("Query params: %s", err)))
-		return
-	}
+	form, _ := c.MultipartForm()
+	files := form.File["files[]"]
 
-	converts["original"] = ""
+	var filesList = make([]models.OutputModel, 0)
 
-	pavo, _ := c.Request.Cookie("istorage")
-	if pavo == nil {
-		pavo = &http.Cookie{
-			Name:    "istorage",
-			Value:   uuid.New().String(),
-			Expires: time.Now().Add(10 * 356 * 24 * time.Hour),
-			Path:    "/",
-		}
-		c.Request.AddCookie(pavo)
-		http.SetCookie(c.Writer, pavo)
-	}
-
-	iStorage := config.Config.Storage.Path
-
-	files, err := upload.Process(c.Request, iStorage)
-	if err == upload.Incomplete {
-		c.JSON(http.StatusOK, gin.H{
-			"status": "ok",
-			"file":   gin.H{"size": files[0].Size},
-		})
-		return
-	}
-
-	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.OnError(fmt.Sprintf("Upload error: %q", err.Error())))
-		return
-	}
-
-	data := make([]map[string]interface{}, 0)
-	for _, ofile := range files {
-		attachment, err := attachment.Create(iStorage, ofile, converts)
+	for _, file := range files {
+		attach, err := attachment.Create(config.Config.Storage.Path, file)
 		if err != nil {
-			data = append(data, map[string]interface{}{
-				"name":  ofile.Filename,
-				"size":  ofile.Size,
-				"error": err.Error(),
-			})
-			continue
+			c.JSON(http.StatusBadRequest, utils.OnError(fmt.Sprintf("Upload error: %q", err.Error())))
+			return
 		}
-		data = append(data, attachment.ToJson())
+
+		fm := attachment.NewFileManager(attachment.FileManagerConfig{
+			attach.Dir,
+			attach.OriginalFile.BaseMime,
+			"original",
+		})
+		fm.SetFilename(attach.OriginalFile.Ext())
+
+		// Upload the file to specific dst.
+		if err = c.SaveUploadedFile(file, fm.Filepath()); err != nil {
+			c.JSON(http.StatusBadRequest, utils.OnError(fmt.Sprintf("Upload error: %q", err.Error())))
+			return
+		}
+
+		filesList = append(filesList, models.OutputModel{
+			FileName: attach.OriginalFile.Filename,
+			Uuid:     attach.Uuid,
+		})
+
+		attach.Version = fm.ToJson().FileName
+
+		go services.InitDb().CreateRecord(attach)
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"status": "ok", "files": data})
+	c.JSON(http.StatusCreated, gin.H{"status": "ok", "files": filesList})
 }
 
 // Get parameters for convert from Request query string

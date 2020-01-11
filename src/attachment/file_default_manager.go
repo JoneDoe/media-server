@@ -25,12 +25,3 @@ func (fdm *FileDefaultManager) Convert(src string, convert string) error {
 
 	return nil
 }
-
-func (fdm *FileDefaultManager) ToJson() map[string]interface{} {
-	return map[string]interface{}{
-		"url":      fdm.Url(),
-		"filename": fdm.Filename,
-		"size":     fdm.Size,
-	}
-
-}

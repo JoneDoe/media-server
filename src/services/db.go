@@ -1,4 +1,4 @@
-package utils
+package services
 
 import (
 	"encoding/json"
@@ -7,16 +7,14 @@ import (
 
 	"github.com/boltdb/bolt"
 
-	a "github.com/JoneDoe/istorage/attachment"
+	a "istorage/attachment"
 )
 
 const dbFile = "iStorage.db"
 const filesBucket = "files"
 
 type Store struct {
-	//blocks []*Block
-	tip []byte
-	db  *bolt.DB
+	db *bolt.DB
 }
 
 type BlockchainIterator struct {
@@ -24,32 +22,53 @@ type BlockchainIterator struct {
 	db          *bolt.DB
 }
 
-func openDb() {
+func InitDb() *Store {
 	db, err := bolt.Open(dbFile, 0600, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	defer db.Close()
+	storage := Store{db: db}
+	storage.CreateBucket(filesBucket)
 
-	//Store.
+	return &storage
+}
+
+func (s *Store) Close() {
+	s.db.Close()
 }
 
 func (s *Store) CreateRecord(attachment *a.Attachment) error {
-	return s.db.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(filesBucket))
+	err := s.db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(filesBucket))
 
 		buf, err := json.Marshal(attachment.ToJson())
 		if err != nil {
 			return err
 		}
 
-		return b.Put([]byte(attachment.Uuid), buf)
+		return bucket.Put([]byte(attachment.Uuid), buf)
 	})
+
+	s.Close()
+
+	return err
 }
 
-func (s *Store) GetRecord(uuid string) a.Attachment {
-	data := a.Attachment{}
+func (s *Store) DeleteRecord(uuid string) error {
+	err := s.db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(filesBucket))
+
+		return bucket.Delete([]byte(uuid))
+	})
+
+	s.Close()
+
+	return err
+}
+
+func (s *Store) GetRecord(uuid string) (map[string]interface{}, error) {
+	data := make(map[string]interface{})
 
 	err := s.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(filesBucket))
@@ -60,13 +79,22 @@ func (s *Store) GetRecord(uuid string) a.Attachment {
 			return err
 		}
 
-		fmt.Printf("The answer is: %s\n", data)
 		return nil
 	})
 
-	checkError(err)
+	s.Close()
 
-	return data
+	return data, err
+}
+
+func (s *Store) CreateBucket(bucketName string) {
+	s.db.Update(func(tx *bolt.Tx) error {
+		_, err := tx.CreateBucketIfNotExists([]byte(bucketName))
+		if err != nil {
+			return fmt.Errorf("create bucket: %s", err)
+		}
+		return nil
+	})
 }
 
 /*func NewBlockchain() *Store {

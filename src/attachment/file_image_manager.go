@@ -27,26 +27,20 @@ func (fim *FileImageManager) Convert(src string, convert string) error {
 	return nil
 }
 
-func (fim *FileImageManager) ToJson() map[string]interface{} {
-	return map[string]interface{}{
-		"url":      fim.Url(),
-		"filename": fim.Filename,
-		"size":     fim.Size,
-		"width":    fim.Width,
-		"height":   fim.Height,
-	}
-
-}
-
 func convertImage(src, dest, convert string) error {
-	args := []string{src, "-strip"}
-	if convert != "" {
-		cv := []string{"-resize", convert + "^", "-gravity", "center", "-extent", convert}
-		args = append(args, cv...)
+	path, err := exec.LookPath("vipsthumbnail")
+	if err != nil {
+		return err
 	}
-	args = append(args, dest)
 
-	out, err := exec.Command("convert", args...).CombinedOutput()
+	var args = []string{
+		src,
+		"--size", convert,
+		"--output", dest,
+		"--crop",
+	}
+
+	out, err := exec.Command(path, args...).CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("Error move original: %s, %s", err, string(out))
 	}
@@ -69,3 +63,8 @@ func identifyImageSizes(filepath string) (int, int, int64, error) {
 
 	return w, h, s, nil
 }
+
+/*
+img, _ := imaging.Open(src)
+	newImage := imaging.Thumbnail(img, 120, 90, imaging.Lanczos)
+	imaging.Save(newImage, dest)*/

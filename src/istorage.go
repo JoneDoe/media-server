@@ -3,13 +3,14 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/JoneDoe/istorage/config"
-	"github.com/gin-gonic/gin"
 	"log"
 
+	"github.com/gin-gonic/gin"
+
+	"istorage/config"
 	//"github.com/gin-gonic/contrib/static"
 
-	"github.com/JoneDoe/istorage/controllers"
+	"istorage/controllers"
 )
 
 func main() {
@@ -23,9 +24,10 @@ func main() {
 
 	router := gin.Default()
 	router.Use(CORSMiddleware())
-	//router.Use(static.Serve("/", static.LocalFile(*storage, false)))
 
 	router.POST("/files", controllers.StoreAttachment)
+	router.GET("/file/:uuid", controllers.ReadFile)
+	router.DELETE("/file/:uuid", controllers.DeleteFile)
 
 	log.Printf("Storage place in: %s", *storage)
 	config.Config.Storage.Path = *storage
