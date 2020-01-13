@@ -43,6 +43,7 @@ func DeleteFile(c *gin.Context) {
 	rec, err := services.InitDb().GetRecord(file.Uuid)
 	if err != nil {
 		c.AbortWithError(http.StatusNotFound, err)
+		return
 	}
 
 	media := models.InitMedia(rec)
