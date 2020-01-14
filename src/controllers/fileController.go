@@ -11,22 +11,20 @@ import (
 )
 
 func ReadFile(c *gin.Context) {
-	file, err := initRequestFile(c)
-	if err != nil {
-		utils.Response{c}.ErrorMsg(err.Error())
-		return
-	}
+	token, _ := bindRequestToken(c)
 
-	rec, err := services.InitDb().GetRecord(file.Uuid)
+	resp := utils.Response{c}
+
+	rec, err := services.InitDb().GetRecord(token.Uuid)
 	if err != nil {
-		c.AbortWithError(http.StatusNotFound, err)
+		resp.Error(http.StatusNotFound, "File not found")
 		return
 	}
 
 	media := models.InitMedia(rec)
 
 	if err = services.Check(media); err != nil {
-		c.AbortWithError(http.StatusNotFound, err)
+		resp.Error(http.StatusNotFound, "Can`t read file")
 		return
 	}
 
@@ -34,33 +32,36 @@ func ReadFile(c *gin.Context) {
 }
 
 func DeleteFile(c *gin.Context) {
-	file, err := initRequestFile(c)
-	if err != nil {
-		utils.Response{c}.ErrorMsg(err.Error())
-		return
-	}
+	token, _ := bindRequestToken(c)
 
-	rec, err := services.InitDb().GetRecord(file.Uuid)
+	resp := utils.Response{c}
+
+	rec, err := services.InitDb().GetRecord(token.Uuid)
 	if err != nil {
-		c.AbortWithError(http.StatusNotFound, err)
+		resp.Error(http.StatusNotFound, "File not found")
 		return
 	}
 
 	media := models.InitMedia(rec)
 
-	if err = services.Check(media); err != nil {
-		c.AbortWithError(http.StatusNotFound, err)
-		return
-	}
+	go removeMedia(media, token.Uuid)
 
-	utils.Response{c}.SuccessMsg(rec)
+	resp.Success(http.StatusOK, token.Uuid)
 }
 
-func initRequestFile(c *gin.Context) (*models.ReqFile, error) {
-	file := &models.ReqFile{}
-	if err := c.ShouldBindUri(&file); err != nil {
+func removeMedia(file *models.MediaFile, uuid string) error {
+	if err := services.RemoveFile(file); err != nil {
+		return err
+	}
+
+	return services.InitDb().DeleteRecord(uuid)
+}
+
+func bindRequestToken(c *gin.Context) (*models.RequestToken, error) {
+	token := &models.RequestToken{}
+	if err := c.ShouldBindUri(&token); err != nil {
 		return nil, err
 	}
 
-	return file, nil
+	return token, nil
 }

@@ -2,6 +2,8 @@ package services
 
 import (
 	"errors"
+	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -24,6 +26,18 @@ func Check(file *models.MediaFile) error {
 		return errors.New("File not found")
 	}
 	return nil
+}
+
+func RemoveFile(file *models.MediaFile) error {
+	if err := Check(file); err != nil {
+		return err
+	}
+
+	path := GetFileStoragePath(file.Path)
+
+	log.Println(fmt.Sprintf("Path %s was cleaned", path))
+
+	return os.RemoveAll(path)
 }
 
 func fileExists(filename string) bool {

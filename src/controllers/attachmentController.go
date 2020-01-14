@@ -27,7 +27,7 @@ func StoreAttachment(c *gin.Context) {
 		})
 
 		if err != nil {
-			c.JSON(http.StatusBadRequest, utils.OnError(fmt.Sprintf("Upload error: %q", err.Error())))
+			utils.Response{c}.Error(http.StatusBadRequest, fmt.Sprintf("Upload error: %q", err.Error()))
 			return
 		}
 

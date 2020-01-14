@@ -1,5 +1,5 @@
 package models
 
-type ReqFile struct {
+type RequestToken struct {
 	Uuid string `uri:"uuid" binding:"required,uuid"`
 }

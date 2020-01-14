@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -10,23 +8,20 @@ type Response struct {
 	Context *gin.Context
 }
 
-func OnError(msg string) map[string]interface{} {
-	return gin.H{
-		"status": "error",
-		"error":  msg,
-	}
+type ErrorResponse struct {
+	Status string `json:"status"`
+	Error  string `json:"error"`
 }
 
-func (r Response) ErrorMsg(msg string) {
-	r.Context.JSON(http.StatusBadRequest, gin.H{
-		"status": "error",
-		"error":  msg,
-	})
+type SuccessResponse struct {
+	Status string      `json:"status"`
+	Data   interface{} `json:"data"`
 }
 
-func (r Response) SuccessMsg(msg map[string]interface{}) {
-	r.Context.JSON(http.StatusOK, gin.H{
-		"status": "ok",
-		"data":   msg,
-	})
+func (r Response) Error(code int, msg string) {
+	r.Context.AbortWithStatusJSON(code, ErrorResponse{"error", msg})
+}
+
+func (r Response) Success(code int, msg string) {
+	r.Context.JSON(code, SuccessResponse{"ok", msg})
 }
