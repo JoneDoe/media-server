@@ -1,14 +1,12 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
 	"istorage/attachment"
-	"istorage/config"
 	"istorage/models"
 	"istorage/services"
 	"istorage/utils"
@@ -21,52 +19,36 @@ func StoreAttachment(c *gin.Context) {
 	var filesList = make([]models.OutputModel, 0)
 
 	for _, file := range files {
-		attach, err := attachment.Create(config.Config.Storage.Path, file)
+		attach := models.Create(file)
+
+		fm, err := attachment.FileManagerFactory(attachment.FileManagerConfig{
+			attach.OriginalFile.MimeType(),
+			"original",
+		})
+
 		if err != nil {
 			c.JSON(http.StatusBadRequest, utils.OnError(fmt.Sprintf("Upload error: %q", err.Error())))
 			return
 		}
 
-		fm := attachment.NewFileManager(attachment.FileManagerConfig{
-			attach.Dir,
-			attach.OriginalFile.BaseMime,
-			"original",
-		})
-		fm.SetFilename(attach.OriginalFile.Ext())
+		fm.SetFile(attach.OriginalFile)
 
-		// Upload the file to specific dst.
-		if err = c.SaveUploadedFile(file, fm.Filepath()); err != nil {
-			c.JSON(http.StatusBadRequest, utils.OnError(fmt.Sprintf("Upload error: %q", err.Error())))
-			return
-		}
-
-		filesList = append(filesList, models.OutputModel{
-			FileName: attach.OriginalFile.Filename,
-			Uuid:     attach.Uuid,
-		})
-
+		attach.Path = fm.DirManager().Path
 		attach.Version = fm.ToJson().FileName
 
-		go services.InitDb().CreateRecord(attach)
+		// Upload the file to specific dst.
+		go store(c, attach, fm)
+
+		filesList = append(filesList, models.OutputModel{
+			FileName: attach.OriginalFile.Filename(),
+			Uuid:     attach.Uuid,
+		})
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"status": "ok", "files": filesList})
 }
 
-// Get parameters for convert from Request query string
-func GetConvertParams(req *http.Request) (map[string]string, error) {
-	raw_converts := req.URL.Query().Get("converts")
-
-	if raw_converts == "" {
-		raw_converts = "{}"
-	}
-
-	convert := make(map[string]string)
-
-	err := json.Unmarshal([]byte(raw_converts), &convert)
-	if err != nil {
-		return nil, err
-	}
-
-	return convert, nil
+func store(c *gin.Context, a *models.Attachment, fm attachment.FileManager) {
+	c.SaveUploadedFile(a.OriginalFile.Upload, fm.Filepath())
+	services.InitDb().CreateRecord(a)
 }

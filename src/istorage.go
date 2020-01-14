@@ -25,9 +25,9 @@ func main() {
 	router := gin.Default()
 	router.Use(CORSMiddleware())
 
-	router.POST("/files", controllers.StoreAttachment)
-	router.GET("/file/:uuid", controllers.ReadFile)
-	router.DELETE("/file/:uuid", controllers.DeleteFile)
+	router.GET("/:uuid", controllers.ReadFile)
+	router.DELETE("/:uuid", controllers.DeleteFile)
+	router.POST("/upload", controllers.StoreAttachment)
 
 	log.Printf("Storage place in: %s", *storage)
 	config.Config.Storage.Path = *storage

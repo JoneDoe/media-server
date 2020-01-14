@@ -1,13 +1,13 @@
 package models
 
 import (
-	"path"
+	"path/filepath"
 
 	"github.com/mitchellh/mapstructure"
 )
 
 type MediaFile struct {
-	Dir     string `json:"dir"`
+	Path    string `json:"path"`
 	Name    string `json:"name"`
 	Type    string `json:"type"`
 	Version string `json:"version"`
@@ -21,5 +21,5 @@ func InitMedia(dbRecord interface{}) *MediaFile {
 }
 
 func (file *MediaFile) FileSystemPath() string {
-	return path.Join(file.Dir, file.Version)
+	return filepath.Join(file.Path, file.Version)
 }

@@ -1,21 +1,18 @@
 package attachment
 
 import (
-	"errors"
-	"io"
-	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
+	"istorage/config"
 	"istorage/models"
-	"istorage/upload"
 )
 
 type FileManager interface {
-	Convert(string, string) error
-	SetFilename(string) *FileBaseManager
-	Store(*upload.OriginalFile) error
+	DirManager() *DirManager
+	SetFile(*models.OriginalFile) *FileBaseManager
 	ToJson() models.FSFile
 	Filepath() string
 }
@@ -26,47 +23,36 @@ type FileBaseManager struct {
 	Filename string
 }
 
+type FileManagerConfig struct {
+	MimeType, Version string
+}
+
 // Return FileManager for given base mime and version.
-func NewFileManager(cfg FileManagerConfig) FileManager {
-	fbm := &FileBaseManager{Dir: cfg.Dir, Version: cfg.Version}
+func FileManagerFactory(cfg FileManagerConfig) (FileManager, error) {
+	dm, err := CreateDir(config.Config.Storage.Path, cfg.MimeType)
+	if err != nil {
+		return nil, err
+	}
+
+	fbm := &FileBaseManager{Dir: dm, Version: cfg.Version}
+
 	switch cfg.MimeType {
 	case "image":
-		return &FileImageManager{FileBaseManager: fbm}
+		return &FileImageManager{FileBaseManager: fbm}, nil
 	default:
-		return &FileDefaultManager{FileBaseManager: fbm}
+		return &FileDefaultManager{FileBaseManager: fbm}, nil
 	}
-
-	return nil
 }
 
-func (fbm *FileBaseManager) Store(file *upload.OriginalFile) error {
-	dest, err := os.Create(fbm.Filepath())
-	if err != nil {
-		return errors.New("failed to create file")
-	}
-
-	defer dest.Close()
-
-	src, err := os.Open(file.Filepath)
-	if err != nil {
-		return errors.New("failed to read file")
-	}
-
-	defer src.Close()
-
-	_, err = io.Copy(dest, src)
-	if err != nil {
-		return errors.New("failed to copy file")
-	}
-
-	os.Remove(file.Filepath)
-
-	return nil
-}
-
-func (fbm *FileBaseManager) SetFilename(ext string) *FileBaseManager {
+func (fbm *FileBaseManager) SetFile(file *models.OriginalFile) *FileBaseManager {
 	salt := strconv.FormatInt(seconds(), 36)
-	fbm.Filename = fbm.Version + "-" + salt + ext
+
+	fbm.Filename = strings.Join([]string{
+		fbm.Version,
+		"-",
+		salt,
+		file.Ext(),
+	}, "")
 
 	return fbm
 }
@@ -81,6 +67,10 @@ func (fbm *FileBaseManager) Url() string {
 
 func (fdm *FileBaseManager) ToJson() models.FSFile {
 	return models.FSFile{fdm.Filename, fdm.Url()}
+}
+
+func (fdm *FileBaseManager) DirManager() *DirManager {
+	return fdm.Dir
 }
 
 func seconds() int64 {
