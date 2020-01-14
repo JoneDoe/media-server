@@ -30,9 +30,15 @@ type StorageConfig struct {
 	ThumbnailSize string `yaml:"thumbnail"`
 }
 
+type DbConfig struct {
+	Database string `yaml:"db_name"`
+	Bucket   string `yaml:"bucket"`
+}
+
 type EnvironmentConfig struct {
 	Server  ServerConfig  `yaml:"server"`
 	Storage StorageConfig `yaml:"storage"`
+	Db      DbConfig      `yaml:"db"`
 }
 
 func LoadConfig(name string) error {

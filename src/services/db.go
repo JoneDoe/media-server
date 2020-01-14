@@ -7,35 +7,34 @@ import (
 
 	"github.com/boltdb/bolt"
 
+	"istorage/config"
 	"istorage/models"
 )
 
-const dbFile = "iStorage.db"
-const filesBucket = "files"
-
-type Store struct {
-	db *bolt.DB
+type Engine struct {
+	db     *bolt.DB
+	Bucket string
 }
 
-func InitDb() *Store {
-	db, err := bolt.Open(dbFile, 0600, nil)
+func InitDb() *Engine {
+	db, err := bolt.Open(config.Config.Db.Database, 0600, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	storage := &Store{db: db}
-	storage.CreateBucket(filesBucket)
+	storage := &Engine{db, config.Config.Db.Bucket}
+	storage.CreateBucket()
 
 	return storage
 }
 
-func (s *Store) Close() {
+func (s *Engine) Close() {
 	s.db.Close()
 }
 
-func (s *Store) CreateRecord(attachment *models.Attachment) error {
+func (s *Engine) CreateRecord(attachment *models.Attachment) error {
 	err := s.db.Update(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket([]byte(filesBucket))
+		bucket := tx.Bucket([]byte(s.Bucket))
 
 		buf, err := json.Marshal(attachment.ToJson())
 		if err != nil {
@@ -50,9 +49,9 @@ func (s *Store) CreateRecord(attachment *models.Attachment) error {
 	return err
 }
 
-func (s *Store) DeleteRecord(uuid string) error {
+func (s *Engine) DeleteRecord(uuid string) error {
 	err := s.db.Update(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket([]byte(filesBucket))
+		bucket := tx.Bucket([]byte(s.Bucket))
 
 		return bucket.Delete([]byte(uuid))
 	})
@@ -62,11 +61,11 @@ func (s *Store) DeleteRecord(uuid string) error {
 	return err
 }
 
-func (s *Store) GetRecord(uuid string) (map[string]interface{}, error) {
+func (s *Engine) GetRecord(uuid string) (map[string]interface{}, error) {
 	data := make(map[string]interface{})
 
 	err := s.db.View(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket([]byte(filesBucket))
+		bucket := tx.Bucket([]byte(s.Bucket))
 		value := bucket.Get([]byte(uuid))
 
 		err := json.Unmarshal(value, &data)
@@ -82,9 +81,9 @@ func (s *Store) GetRecord(uuid string) (map[string]interface{}, error) {
 	return data, err
 }
 
-func (s *Store) CreateBucket(bucketName string) {
+func (s *Engine) CreateBucket() {
 	s.db.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte(bucketName))
+		_, err := tx.CreateBucketIfNotExists([]byte(s.Bucket))
 		if err != nil {
 			return fmt.Errorf("create bucket: %s", err)
 		}

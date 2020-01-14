@@ -13,6 +13,8 @@ import (
 	"istorage/controllers"
 )
 
+var envConfiguration = "server.cfg"
+
 func main() {
 
 	flag.Parse()
@@ -37,7 +39,7 @@ func main() {
 }
 
 func initConfig() {
-	envName := *flag.String("c", "server.cfg", "Environment config name")
+	envName := *flag.String("c", envConfiguration, "Environment config name")
 
 	err := config.LoadConfig(envName)
 	if err != nil {
@@ -47,7 +49,7 @@ func initConfig() {
 
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		//c.Writer.Header().Set("Content-Type", "application/json")
+		c.Writer.Header().Set("Content-Type", "application/json")
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, PATCH, DELETE")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, Content-Range, Content-Disposition, Authorization")
