@@ -31,11 +31,6 @@ func StoreAttachment(c *gin.Context) {
 			return
 		}
 
-		fm.SetFile(attach.OriginalFile)
-
-		attach.Path = fm.DirManager().Path
-		attach.Version = fm.ToJson().FileName
-
 		// Upload the file to specific dst.
 		go store(c, attach, fm)
 
@@ -49,6 +44,12 @@ func StoreAttachment(c *gin.Context) {
 }
 
 func store(c *gin.Context, a *models.Attachment, fm attachment.FileManager) {
+	fm.SetFile(a.OriginalFile)
+
+	a.Path = fm.DirManager().Path
+	a.Version = fm.ToJson().FileName
+
 	c.SaveUploadedFile(a.OriginalFile.Upload, fm.Filepath())
+
 	services.InitDb().CreateRecord(a)
 }

@@ -33,7 +33,7 @@ func (s *Engine) Close() {
 }
 
 func (s *Engine) CreateRecord(attachment *models.Attachment) error {
-	err := s.db.Update(func(tx *bolt.Tx) error {
+	err := s.db.Batch(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(s.Bucket))
 
 		buf, err := json.Marshal(attachment.ToJson())
