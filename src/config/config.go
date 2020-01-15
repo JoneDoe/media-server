@@ -43,9 +43,8 @@ type EnvironmentConfig struct {
 
 func LoadConfig(name string) error {
 	cwd, _ := os.Getwd()
-	cwd = filepath.Join(cwd, "config")
 
-	data, err := ioutil.ReadFile(filepath.Join(cwd, name))
+	data, err := ioutil.ReadFile(filepath.Join(cwd, "..", name))
 	if err != nil {
 		return err
 	}

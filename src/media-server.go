@@ -8,8 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"istorage/config"
-	//"github.com/gin-gonic/contrib/static"
-
 	"istorage/controllers"
 )
 
@@ -17,12 +15,12 @@ var envConfiguration = "server.cfg"
 
 func main() {
 
-	flag.Parse()
-
 	initConfig()
 
 	host := flag.String("host", config.Config.Server.Host+config.Config.Server.Port, "host:port for iMedia server.")
 	storage := flag.String("storage", config.Config.Storage.Path, "Root for storage")
+
+	flag.Parse()
 
 	router := gin.Default()
 	router.Use(CORSMiddleware())
@@ -35,7 +33,7 @@ func main() {
 	config.Config.Storage.Path = *storage
 
 	log.Printf("Start server on %s", *host)
-	router.Run(*host)
+	router.Run(config.Config.Server.Port)
 }
 
 func initConfig() {
