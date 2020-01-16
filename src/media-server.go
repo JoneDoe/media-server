@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -39,8 +38,8 @@ func main() {
 	server := &http.Server{
 		Addr:           config.Config.Server.Port,
 		Handler:        router,
-		ReadTimeout:    config.Config.Server.ReadTimeout * time.Second,
-		WriteTimeout:   config.Config.Server.WriteTimeout * time.Second,
+		ReadTimeout:    config.Config.Server.ReadTimeout,
+		WriteTimeout:   config.Config.Server.WriteTimeout,
 		MaxHeaderBytes: 1 << 20,
 	}
 
