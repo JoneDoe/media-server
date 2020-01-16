@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -33,7 +35,16 @@ func main() {
 	config.Config.Storage.Path = *storage
 
 	log.Printf("Start server on %s", *host)
-	router.Run(config.Config.Server.Port)
+
+	server := &http.Server{
+		Addr:           config.Config.Server.Port,
+		Handler:        router,
+		ReadTimeout:    config.Config.Server.ReadTimeout * time.Second,
+		WriteTimeout:   config.Config.Server.WriteTimeout * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+
+	server.ListenAndServe()
 }
 
 func initConfig() {
