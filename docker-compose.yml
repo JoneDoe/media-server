@@ -1,0 +1,20 @@
+version: '3'
+services:
+  app:
+    build:
+      context: .
+      args:
+        DATA_PATH: /data
+        BUILD_PATH: /build
+        APP_NAME: media-storage
+    container_name: media-server
+    image: media-server:latest
+    ports:
+      - "8080:8080"
+    networks:
+      - backend
+    volumes:
+      - ./data:/app/data
+
+networks:
+  backend:

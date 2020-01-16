@@ -1,31 +1,17 @@
 # Dockerfile_old References: https://docs.docker.com/engine/reference/builder/
 
+# Build Default Args
+ARG APP_NAME=media-storage
+
 # Start from the latest golang base image
 FROM golang:latest as builder
 
-# Add Maintainer Info
-LABEL maintainer="Vadym Titov <vad.titov@gmail.com>"
+# Build Args
+ARG BUILD_PATH
+ARG APP_NAME
 
 # Set the Current Working Directory inside the container
-WORKDIR /app
-
-
-######## Start a new volume stage #######
-# Build Args
-ARG STORAGE_DIR=/app/storage
-
-# Create Log Directory
-RUN mkdir -p ${STORAGE_DIR}
-
-# Declare volumes to mount
-VOLUME [${STORAGE_DIR}]
-
-# Environment Variables
-ENV STORAGE_DIR=${MASTER_NAME}
-#ENV LOG_FILE_LOCATION=${STORAGE_DIR}/app.log
-
-# Copy go mod and sum files
-#COPY src/go.mod src/go.sum ./
+WORKDIR ${BUILD_PATH}
 
 # Copy the source from the current directory to the Working Directory inside the container
 COPY src/ .
@@ -34,19 +20,31 @@ COPY src/ .
 RUN go mod download
 
 # Build the Go app
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o bin/media-storage .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ${APP_NAME} .
 
 
 ######## Start a new stage from scratch #######
-FROM alpine:latest
+FROM ubuntu:18.04
 
-RUN apk --no-cache add ca-certificates
+# Add Maintainer Info
+LABEL maintainer="Vadym Titov <vad.titov@gmail.com>"
+
+# Build Args
+ARG DATA_PATH
+ARG BUILD_PATH
+ARG APP_NAME
+
+WORKDIR /app
+
+######## Start a new volume stage #######
+# Create Directory
+RUN mkdir -p ${DATA_PATH}
 
 # Copy server configuration
 COPY server.cfg .
 
 # Copy the Pre-built binary file from the previous stage
-COPY --from=builder /app/bin/media-storage .
+COPY --from=builder ${BUILD_PATH}/${APP_NAME} .
 
 # Expose port 8080 to the outside world
 EXPOSE 8080
