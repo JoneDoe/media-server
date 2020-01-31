@@ -26,6 +26,7 @@ func main() {
 	router := gin.Default()
 	router.Use(CORSMiddleware())
 
+	router.GET("/:uuid/:profile", controllers.ReadFile, controllers.ReadFileWithResize)
 	router.GET("/:uuid", controllers.ReadFile)
 	router.DELETE("/:uuid", controllers.DeleteFile)
 	router.POST("/upload", controllers.StoreAttachment)
