@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -23,6 +24,7 @@ func ReadFile(c *gin.Context) {
 	rec, err := services.InitDb().GetRecord(token.Uuid)
 	if err != nil {
 		resp.Error(http.StatusNotFound, "File not found")
+
 		return
 	}
 
@@ -30,6 +32,7 @@ func ReadFile(c *gin.Context) {
 
 	if err = services.Check(media); err != nil {
 		resp.Error(http.StatusNotFound, "Can`t read file")
+
 		return
 	}
 
@@ -37,6 +40,7 @@ func ReadFile(c *gin.Context) {
 	if resizeProfile.ProfileName != "" {
 		resizeProfile.MediaFile = media
 		c.Set("resizeProfile", resizeProfile)
+
 		return
 	}
 
@@ -56,6 +60,9 @@ func ReadFileWithResize(c *gin.Context) {
 			"Can`t make operation, try one of following: ",
 			imaginary.AvailableProfiles(),
 		}, ""))
+
+		log.Fatalln(err)
+
 		return
 	}
 
@@ -70,6 +77,7 @@ func DeleteFile(c *gin.Context) {
 	rec, err := services.InitDb().GetRecord(token.Uuid)
 	if err != nil {
 		resp.Error(http.StatusNotFound, "File not found")
+
 		return
 	}
 

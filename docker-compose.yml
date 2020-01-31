@@ -6,9 +6,8 @@ services:
       args:
         DATA_PATH: /data
         BUILD_PATH: /build
-        APP_NAME: media-storage
-    container_name: media-server
-    image: media-server:latest
+    container_name: cloud-drive
+    image: cloud-drive:latest
     ports:
       - "8080:8080"
     networks:
