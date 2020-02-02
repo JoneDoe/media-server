@@ -4,7 +4,7 @@
 ARG APP_NAME=i-drive
 
 # Start from the latest golang base image
-FROM golang:latest as builder
+FROM golang:alpine as builder
 
 # Build Args
 ARG BUILD_PATH=/build
