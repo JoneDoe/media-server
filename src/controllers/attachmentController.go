@@ -13,8 +13,20 @@ import (
 )
 
 func StoreAttachment(c *gin.Context) {
+	errMsg := "Undefined any file"
+
+	if c.GetHeader("Content-Length") == "0" {
+		utils.Response{c}.Error(http.StatusBadRequest, errMsg)
+		return
+	}
+
 	form, _ := c.MultipartForm()
+
 	files := form.File["files[]"]
+	if len(files) == 0 {
+		utils.Response{c}.Error(http.StatusBadRequest, errMsg)
+		return
+	}
 
 	var filesList = make([]models.OutputModel, 0)
 
