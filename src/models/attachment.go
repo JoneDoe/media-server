@@ -6,6 +6,8 @@ import (
 	"github.com/google/uuid"
 )
 
+const FileTypeImage = "image"
+
 // Attachment contain info about original uploaded file, uuid...
 type Attachment struct {
 	OriginalFile        *OriginalFile

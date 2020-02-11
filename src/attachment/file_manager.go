@@ -37,7 +37,7 @@ func FileManagerFactory(cfg FileManagerConfig) (FileManager, error) {
 	fbm := &FileBaseManager{Dir: dm, Version: cfg.Version}
 
 	switch cfg.MimeType {
-	case "image":
+	case models.FileTypeImage:
 		return &FileImageManager{FileBaseManager: fbm}, nil
 	default:
 		return &FileDefaultManager{FileBaseManager: fbm}, nil
