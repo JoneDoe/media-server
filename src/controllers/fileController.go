@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -50,6 +49,11 @@ func ReadFile(c *gin.Context) {
 func ReadFileWithResize(c *gin.Context) {
 	resizeProfile := c.MustGet("resizeProfile").(*imaginary.ResizeProfile)
 
+	if resizeProfile.MediaFile.Type != models.FileTypeImage {
+		utils.Response{c}.Error(http.StatusUnsupportedMediaType, "Operation allowed only for image files")
+		return
+	}
+
 	pattern := strings.Join([]string{"cropper", ".*", filepath.Ext(resizeProfile.MediaFile.Name)}, "")
 	tmpFile, _ := ioutil.TempFile("", pattern)
 	defer os.Remove(tmpFile.Name()) // clean up
@@ -60,8 +64,6 @@ func ReadFileWithResize(c *gin.Context) {
 			"Can`t make operation, try one of following: ",
 			imaginary.AvailableProfiles(),
 		}, ""))
-
-		log.Fatalln(err)
 
 		return
 	}

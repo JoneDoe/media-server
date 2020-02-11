@@ -6,8 +6,8 @@ services:
       args:
         DATA_PATH: /data
         BUILD_PATH: /build
-    container_name: cloud-drive
-    image: cloud-drive:latest
+    container_name: sm-drive
+    image: sm-drive:latest
     ports:
       - "8080:8080"
     networks:

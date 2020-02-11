@@ -1,8 +1,7 @@
-dummy/root_storage/*
-!dummy/root_storage/example/
 .DS_Store
-pkg/
-bin/
-
 .idea/
+.vscode/
+ws.code-workspace
+
+bin/
 data/
