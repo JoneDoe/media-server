@@ -28,7 +28,11 @@ func ReadFile(c *gin.Context) {
 		return
 	}
 
-	c.FileAttachment(services.AbsolutePath(media), media.Name)
+	if media.Type == "image" {
+		c.File(services.AbsolutePath(media))
+	} else {
+		c.FileAttachment(services.AbsolutePath(media), media.Name)
+	}
 }
 
 func DeleteFile(c *gin.Context) {
