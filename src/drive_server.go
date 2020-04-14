@@ -23,13 +23,20 @@ func main() {
 
 	flag.Parse()
 
+	gin.SetMode(gin.ReleaseMode)
+
 	router := gin.Default()
 	router.Use(CORSMiddleware())
 
-	router.GET("/:uuid/:profile", controllers.ReadFile, controllers.ReadFileWithResize)
-	router.GET("/:uuid", controllers.ReadFile)
-	router.DELETE("/:uuid", controllers.DeleteFile)
-	router.POST("/upload", controllers.StoreAttachment)
+	file := router.Group("/files")
+	{
+		file.GET("/:uuid/:profile", controllers.ReadFile, controllers.ReadFileWithResize)
+		file.GET("/:uuid", controllers.ReadFile)
+		file.DELETE("/:uuid", controllers.DeleteFile)
+		file.POST("/upload", controllers.StoreAttachment)
+	}
+
+	router.GET("/__healthcheck", controllers.HealthCheck)
 
 	log.Printf("Storage place in: %s", *storage)
 	config.Config.Storage.Path = *storage
@@ -58,7 +65,6 @@ func initConfig() {
 
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		//c.Writer.Header().Set("Content-Type", "application/json")
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, PATCH, DELETE")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, Content-Range, Content-Disposition, Authorization")
@@ -67,6 +73,5 @@ func CORSMiddleware() gin.HandlerFunc {
 			c.AbortWithStatus(200)
 			return
 		}
-		// c.Next()
 	}
 }
