@@ -2,26 +2,37 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"log"
 	"net/http"
+	"os"
 
+	"github.com/getsentry/raven-go"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 
 	"istorage/config"
 	"istorage/controllers"
+	"istorage/logger"
 )
 
 var envConfiguration = "server.cfg"
 
-func main() {
+func init() {
+	godotenv.Load()
 
 	initConfig()
+	SentryInit()
+}
 
+func main() {
 	host := flag.String("host", config.Config.Server.Host+config.Config.Server.Port, "host:port for iMedia server.")
 	storage := flag.String("storage", config.Config.Storage.Path, "Root for storage")
 
 	flag.Parse()
+
+	logger.Infof("Storage place in: %s", *storage)
+	logger.Infof("Start server on %s", *host)
+
+	config.Config.Storage.Path = *storage
 
 	router := gin.Default()
 	router.Use(CORSMiddleware())
@@ -30,11 +41,6 @@ func main() {
 	router.GET("/:uuid", controllers.ReadFile)
 	router.DELETE("/:uuid", controllers.DeleteFile)
 	router.POST("/upload", controllers.StoreAttachment)
-
-	log.Printf("Storage place in: %s", *storage)
-	config.Config.Storage.Path = *storage
-
-	log.Printf("Start server on %s", *host)
 
 	server := &http.Server{
 		Addr:           config.Config.Server.Port,
@@ -52,8 +58,17 @@ func initConfig() {
 
 	err := config.LoadConfig(envName)
 	if err != nil {
-		fmt.Println(err)
+		logger.Fatal(err)
 	}
+}
+
+func SentryInit() {
+	dsn, exists := os.LookupEnv("SENTRY_DSN")
+	if !exists {
+		panic("Not found SENTRY_DSN environment variable")
+	}
+
+	raven.SetDSN(dsn)
 }
 
 func CORSMiddleware() gin.HandlerFunc {
