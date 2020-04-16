@@ -14,6 +14,8 @@ services:
       - backend
     volumes:
       - ./data:/app/data
+    environment:
+      SENTRY_DSN: ${SENTRY_DSN}
 
 networks:
   backend:
