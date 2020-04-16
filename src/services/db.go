@@ -3,11 +3,11 @@ package services
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 
 	"github.com/boltdb/bolt"
 
 	"istorage/config"
+	"istorage/logger"
 	"istorage/models"
 )
 
@@ -19,11 +19,15 @@ type Engine struct {
 func InitDb() *Engine {
 	db, err := bolt.Open(config.Config.Db.Database, 0600, nil)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 
 	storage := &Engine{db, config.Config.Db.Bucket}
-	storage.CreateBucket()
+
+	err = storage.CreateBucket()
+	if err != nil {
+		logger.Fatal(err)
+	}
 
 	return storage
 }
@@ -81,12 +85,15 @@ func (s *Engine) GetRecord(uuid string) (map[string]interface{}, error) {
 	return data, err
 }
 
-func (s *Engine) CreateBucket() {
-	s.db.Update(func(tx *bolt.Tx) error {
+func (s *Engine) CreateBucket() error {
+	err := s.db.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists([]byte(s.Bucket))
 		if err != nil {
 			return fmt.Errorf("create bucket: %s", err)
 		}
+
 		return nil
 	})
+
+	return err
 }

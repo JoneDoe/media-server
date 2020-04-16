@@ -2,12 +2,11 @@ package services
 
 import (
 	"errors"
-	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 
 	"istorage/config"
+	"istorage/logger"
 	"istorage/models"
 )
 
@@ -35,7 +34,7 @@ func RemoveFile(file *models.MediaFile) error {
 
 	path := GetFileStoragePath(file.Path)
 
-	log.Println(fmt.Sprintf("Path %s was cleaned", path))
+	logger.Infof("Path %s was cleaned", path)
 
 	return os.RemoveAll(path)
 }

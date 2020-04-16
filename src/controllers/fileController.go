@@ -55,6 +55,7 @@ func ReadFileWithResize(c *gin.Context) {
 
 	if resizeProfile.MediaFile.Type != models.FileTypeImage {
 		utils.Response{c}.Error(http.StatusUnsupportedMediaType, "Operation allowed only for image files")
+
 		return
 	}
 

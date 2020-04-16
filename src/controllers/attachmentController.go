@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"istorage/attachment"
+	"istorage/logger"
 	"istorage/models"
 	"istorage/services"
 	"istorage/utils"
@@ -17,6 +18,7 @@ func StoreAttachment(c *gin.Context) {
 
 	if c.GetHeader("Content-Length") == "0" {
 		utils.Response{c}.Error(http.StatusBadRequest, errMsg)
+
 		return
 	}
 
@@ -25,6 +27,7 @@ func StoreAttachment(c *gin.Context) {
 	files := form.File["files[]"]
 	if len(files) == 0 {
 		utils.Response{c}.Error(http.StatusBadRequest, errMsg)
+
 		return
 	}
 
@@ -39,7 +42,9 @@ func StoreAttachment(c *gin.Context) {
 		})
 
 		if err != nil {
+			logger.Error(err)
 			utils.Response{c}.Error(http.StatusBadRequest, fmt.Sprintf("Upload error: %q", err.Error()))
+
 			return
 		}
 
