@@ -2,7 +2,7 @@
 ## API Endpoints
 ### Upload 
 Store file into service.
-* URL `http://hostname:8080/upload`
+* URL `http://hostname:8080/files/upload`
 * Content type `multipart/form-data`
 * Method `POST`
 * Data Params `files[]`
@@ -23,7 +23,7 @@ Store file into service.
 ---
 ### Delete
 Delete stored file
-* URL `http://hostname:8080/:uuid`
+* URL `http://hostname:8080/files/:uuid`
 * Method `DELETE`
 * URL Params
   
@@ -42,7 +42,7 @@ Delete stored file
     ````
 ---
 ### Get stored file
-* URL `http://hostname:8080/:uuid`
+* URL `http://hostname:8080/files/:uuid`
 * Method `GET`
 * URL Params
   
@@ -53,7 +53,7 @@ Delete stored file
 * Success Response: `binary-data`
 ---
 ### Get resized Image
-* URL `http://hostname:8080/:uuid/:profile`
+* URL `http://hostname:8080/files/:uuid/:profile`
 * Method `GET`
 * URL Params
   
@@ -70,3 +70,15 @@ Delete stored file
         
 * Success Response: `binary-data`
 ___
+### Service health-check
+* URL `http://hostname:8080/__healthcheck`
+* Method `GET`
+* Success Response `application/json`
+    * Code: 200
+    * Content:
+    ````
+    {
+      "service": "sm-drive",
+    }
+    ````
+---
