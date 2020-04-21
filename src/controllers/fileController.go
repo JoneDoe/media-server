@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"istorage/imaginary"
+	"istorage/logger"
 	"istorage/models"
 	"istorage/services"
 	"istorage/utils"
@@ -90,7 +91,12 @@ func DeleteFile(c *gin.Context) {
 
 	media := models.InitMedia(rec)
 
-	go removeMedia(media, token.Uuid)
+	go func() {
+		err := removeMedia(media, token.Uuid)
+		if err != nil {
+			logger.Error(err)
+		}
+	}()
 
 	resp.Success(http.StatusOK, token.Uuid)
 }

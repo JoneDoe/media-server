@@ -2,9 +2,9 @@ package logger
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/getsentry/raven-go"
+	glog "github.com/sirupsen/logrus"
 )
 
 type Logger struct {
@@ -12,7 +12,9 @@ type Logger struct {
 	tags                 map[string]string
 }
 
-var defaultLogger = New(true, nil)
+var (
+	defaultLogger = New(false, nil)
+)
 
 func New(verbose bool, tags map[string]string) *Logger {
 	return &Logger{
@@ -38,11 +40,7 @@ func (l *Logger) Fatal(err error) {
 }
 
 func Info(message string) {
-	if defaultLogger.verbose {
-		log.Println(message)
-	}
-
-	//go raven.CaptureMessage(message, l.tags)
+	glog.Info(message)
 }
 
 func Infof(format string, v ...interface{}) {
@@ -50,17 +48,11 @@ func Infof(format string, v ...interface{}) {
 }
 
 func Error(err error) {
-	if defaultLogger.verbose {
-		log.Println(err.Error())
-	}
-
+	glog.Error(err)
 	go raven.CaptureError(err, defaultLogger.tags)
 }
 
 func Fatal(err error) {
 	raven.CaptureErrorAndWait(err, nil)
-
-	if defaultLogger.verbose {
-		log.Fatal(err)
-	}
+	glog.Fatal(err)
 }

@@ -5,9 +5,11 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gemnasium/logrus-graylog-hook/v3"
 	"github.com/getsentry/raven-go"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/sirupsen/logrus"
 
 	"istorage/config"
 	"istorage/controllers"
@@ -21,6 +23,7 @@ func init() {
 
 	initConfig()
 	SentryInit()
+	GraylogInit()
 }
 
 func main() {
@@ -76,6 +79,23 @@ func SentryInit() {
 	}
 
 	raven.SetDSN(dsn)
+}
+
+func GraylogInit() {
+	host, exists := os.LookupEnv("GRAYLOG_HOST")
+	if !exists {
+		panic("Not found SENTRY_DSN environment variable")
+	}
+
+	port, exists := os.LookupEnv("GRAYLOG_PORT")
+	if !exists {
+		panic("Not found SENTRY_DSN environment variable")
+	}
+
+	hook := graylog.NewAsyncGraylogHook(host+":"+port, map[string]interface{}{})
+	defer hook.Flush()
+
+	logrus.AddHook(hook)
 }
 
 func CORSMiddleware() gin.HandlerFunc {

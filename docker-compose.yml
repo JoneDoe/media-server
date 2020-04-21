@@ -16,6 +16,8 @@ services:
       - ./data:/app/data
     environment:
       SENTRY_DSN: ${SENTRY_DSN}
+      GRAYLOG_HOST: ${GRAYLOG_HOST}
+      GRAYLOG_PORT: ${GRAYLOG_PORT}
 
 networks:
   backend:
