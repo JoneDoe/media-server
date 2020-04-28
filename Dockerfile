@@ -54,7 +54,7 @@ COPY server.cfg .
 COPY profiles.cfg .
 
 # Copy the Pre-built binary file from the previous stage
-COPY --from=builder ${BUILD_PATH}/${APP_NAME} /usr/local/bin/
+COPY --from=builder $BUILD_PATH/$APP_NAME /usr/local/bin/
 
 # Expose port 8080 to the outside world
 EXPOSE 8080
