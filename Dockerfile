@@ -47,7 +47,7 @@ WORKDIR /app
 
 ######## Start a new volume stage #######
 # Create Directory
-RUN mkdir -p ${DATA_PATH}
+RUN mkdir -p "${DATA_PATH}"
 
 # Copy server configuration
 COPY server.cfg .
